@@ -4,6 +4,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
 
 --// ANTI DUPLICAÇÃO
 if playerGui:FindFirstChild("LaranjaScriptGUI") then
@@ -19,7 +20,7 @@ screenGui.ResetOnSpawn = false
 --// MAIN FRAME
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 500, 0, 350)
+mainFrame.Size = UDim2.new(0, 520, 0, 380)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
@@ -33,7 +34,7 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 15)
 corner.Parent = mainFrame
 
---// LED CONTORNANDO O MENU (NEON)
+--// LED NEON
 local borderLED = Instance.new("UIStroke")
 borderLED.Parent = mainFrame
 borderLED.Color = Color3.fromRGB(255,140,0)
@@ -47,7 +48,7 @@ title.Name = "Title"
 title.Size = UDim2.new(1, 0, 0, 40)
 title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "LARANJA SCRIPT"
+title.Text = "LARANJA SCRIPT" -- Título editável
 title.Font = Enum.Font.GothamBold
 title.TextSize = 28
 title.TextColor3 = borderLED.Color
@@ -59,7 +60,7 @@ subtitle.Name = "Subtitle"
 subtitle.Size = UDim2.new(1,0,0,20)
 subtitle.Position = UDim2.new(0,0,0,40)
 subtitle.BackgroundTransparency = 1
-subtitle.Text = "CATEGORIA"
+subtitle.Text = "CATEGORIA" -- Subtítulo editável
 subtitle.TextColor3 = Color3.fromRGB(255,255,255)
 subtitle.Font = Enum.Font.Gotham
 subtitle.TextSize = 16
@@ -81,6 +82,10 @@ local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(0,8)
 closeCorner.Parent = closeButton
 
+closeButton.MouseButton1Click:Connect(function()
+    TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position=UDim2.new(0.5,0,0.5,-600)}):Play()
+end)
+
 --// CONTENT FRAME
 local contentFrame = Instance.new("Frame")
 contentFrame.Name = "ContentFrame"
@@ -93,32 +98,19 @@ contentFrame.Parent = mainFrame
 local tabs = {"SCRIPT","INFORMAÇÕES"}
 local activeTab = nil
 
--- SCRIPT DATA GLOBAL
+--// DADOS DOS SCRIPTS (30 scripts separados)
 local scriptData = {}
-for i=1,30 do
+for i = 1,30 do
     table.insert(scriptData,{
-        Name="Script "..i,
-        Description="Descrição do Script "..i,
-        Image="rbxassetid://12345678", -- Substitua pelo ID da imagem
-        Link="https://linkdosescript.com/script"..i,
-        Executions=0
+        Name = "Script "..i, -- Nome editável
+        Description = "Descrição do Script "..i, -- Descrição editável
+        Image = "rbxassetid://12345678", -- Imagem editável
+        Link = "https://linkdosescript.com/script"..i, -- Link editável
+        Executions = 0
     })
 end
 
---// FUNÇÃO ABRIR E FECHAR
-local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-
-local function openMenu()
-    TweenService:Create(mainFrame,tweenInfo,{Position=UDim2.new(0.5,0,0.5,0)}):Play()
-end
-
-local function closeMenu()
-    TweenService:Create(mainFrame,tweenInfo,{Position=UDim2.new(0.5,0,0.5,-600)}):Play()
-end
-
-closeButton.MouseButton1Click:Connect(closeMenu)
-
--- Função para criar abas
+-- Função criar abas
 local function createTabButton(name,index,totalTabs)
     local btn = Instance.new("TextButton")
     btn.Name = name:gsub(" ","")
@@ -149,7 +141,7 @@ local function createTabButton(name,index,totalTabs)
             TweenService:Create(activeTab,TweenInfo.new(0.2),{BackgroundColor3=Color3.fromRGB(100,100,100)}):Play()
         end
         activeTab = btn
-        TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3=Color3.fromRGB(180,120,0)}):Play()
+        TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3=Color3.fromRGB(0,120,255)}):Play() -- Azul ativo
 
         for _, frame in pairs(contentFrame:GetChildren()) do
             frame.Visible = false
@@ -164,26 +156,10 @@ local function createTabButton(name,index,totalTabs)
             label.BackgroundTransparency = 1
             label.Parent = contentFrame
 
-            -- ABA SCRIPT
             if name == "SCRIPT" then
-                local searchBox = Instance.new("TextBox")
-                searchBox.PlaceholderText = "Pesquisar..."
-                searchBox.Text = ""
-                searchBox.Size = UDim2.new(1,-20,0,30)
-                searchBox.Position = UDim2.new(0,10,0,50)
-                searchBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
-                searchBox.TextColor3 = Color3.fromRGB(255,255,255)
-                searchBox.Font = Enum.Font.Gotham
-                searchBox.TextSize = 16
-                searchBox.ClearTextOnFocus = false
-                local corner = Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(0,6)
-                corner.Parent = searchBox
-                searchBox.Parent = label
-
                 local scrollFrame = Instance.new("ScrollingFrame")
-                scrollFrame.Size = UDim2.new(1,-20,1,-100)
-                scrollFrame.Position = UDim2.new(0,10,0,90)
+                scrollFrame.Size = UDim2.new(1,-20,1,-70)
+                scrollFrame.Position = UDim2.new(0,10,0,50)
                 scrollFrame.BackgroundTransparency = 1
                 scrollFrame.BorderSizePixel = 0
                 scrollFrame.ScrollBarThickness = 6
@@ -192,95 +168,83 @@ local function createTabButton(name,index,totalTabs)
                 scrollFrame.CanvasSize = UDim2.new(0,0,0,0)
                 scrollFrame.Parent = label
 
-                local function updateCanvas()
-                    local totalHeight = 10
-                    local count = 0
+                local totalHeight = 10
+                for _, data in ipairs(scriptData) do
+                    -- Bloco separado
+                    local block = Instance.new("Frame")
+                    block.Size = UDim2.new(1,0,0,100)
+                    block.Position = UDim2.new(0,0,0,totalHeight)
+                    block.BackgroundColor3 = Color3.fromRGB(50,50,50)
+                    block.BorderSizePixel = 0
+                    block.Parent = scrollFrame
+                    local blockCorner = Instance.new("UICorner")
+                    blockCorner.CornerRadius = UDim.new(0,10)
+                    blockCorner.Parent = block
 
-                    for _, child in pairs(scrollFrame:GetChildren()) do
-                        if child:IsA("Frame") then
-                            child:Destroy()
-                        end
-                    end
+                    -- Imagem
+                    local img = Instance.new("ImageLabel")
+                    img.Size = UDim2.new(0,80,0,80)
+                    img.Position = UDim2.new(0,10,0,10)
+                    img.Image = data.Image
+                    img.BackgroundTransparency = 0
+                    local imgCorner = Instance.new("UICorner")
+                    imgCorner.CornerRadius = UDim.new(0,40)
+                    imgCorner.Parent = img
+                    img.Parent = block
 
-                    for _, data in ipairs(scriptData) do
-                        if string.find(string.lower(data.Name), string.lower(searchBox.Text)) then
-                            count = count + 1
-                            if count > 30 then break end
+                    -- Nome
+                    local nameLabel = Instance.new("TextLabel")
+                    nameLabel.Size = UDim2.new(0.5,0,0,25)
+                    nameLabel.Position = UDim2.new(0,100,0,10)
+                    nameLabel.Text = data.Name
+                    nameLabel.TextColor3 = Color3.fromRGB(255,255,255)
+                    nameLabel.Font = Enum.Font.GothamBold
+                    nameLabel.TextSize = 18
+                    nameLabel.BackgroundTransparency = 1
+                    nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+                    nameLabel.Parent = block
 
-                            local slot = Instance.new("Frame")
-                            slot.Size = UDim2.new(1,-10,0,80)
-                            slot.Position = UDim2.new(0,5,0,totalHeight)
-                            slot.BackgroundColor3 = Color3.fromRGB(60,60,60)
-                            slot.BorderSizePixel = 0
-                            slot.Parent = scrollFrame
-                            local slotCorner = Instance.new("UICorner")
-                            slotCorner.CornerRadius = UDim.new(0,8)
-                            slotCorner.Parent = slot
+                    -- Descrição
+                    local descLabel = Instance.new("TextLabel")
+                    descLabel.Size = UDim2.new(0.7,0,0,50)
+                    descLabel.Position = UDim2.new(0,100,0,35)
+                    descLabel.Text = data.Description
+                    descLabel.TextColor3 = Color3.fromRGB(200,200,200)
+                    descLabel.Font = Enum.Font.Gotham
+                    descLabel.TextSize = 14
+                    descLabel.TextWrapped = true
+                    descLabel.BackgroundTransparency = 1
+                    descLabel.TextXAlignment = Enum.TextXAlignment.Left
+                    descLabel.Parent = block
 
-                            local img = Instance.new("ImageLabel")
-                            img.Size = UDim2.new(0,60,0,60)
-                            img.Position = UDim2.new(0,10,0,10)
-                            img.Image = data.Image
-                            img.BackgroundTransparency = 0
-                            local imgCorner = Instance.new("UICorner")
-                            imgCorner.CornerRadius = UDim.new(0,30)
-                            imgCorner.Parent = img
-                            img.Parent = slot
+                    -- Botão Executar
+                    local executeBtn = Instance.new("TextButton")
+                    executeBtn.Size = UDim2.new(0,80,0,30)
+                    executeBtn.Position = UDim2.new(1,-90,0,35)
+                    executeBtn.Text = "Executar"
+                    executeBtn.TextColor3 = Color3.fromRGB(255,255,255)
+                    executeBtn.BackgroundColor3 = Color3.fromRGB(0,120,255)
+                    executeBtn.Font = Enum.Font.GothamBold
+                    executeBtn.TextSize = 16
+                    local btnCorner = Instance.new("UICorner")
+                    btnCorner.CornerRadius = UDim.new(0,6)
+                    btnCorner.Parent = executeBtn
+                    executeBtn.Parent = block
 
-                            local nameLabel = Instance.new("TextLabel")
-                            nameLabel.Size = UDim2.new(0.5,0,0,25)
-                            nameLabel.Position = UDim2.new(0,80,0,10)
-                            nameLabel.Text = data.Name
-                            nameLabel.TextColor3 = Color3.fromRGB(255,255,255)
-                            nameLabel.Font = Enum.Font.GothamBold
-                            nameLabel.TextSize = 18
-                            nameLabel.BackgroundTransparency = 1
-                            nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-                            nameLabel.Parent = slot
+                    executeBtn.MouseButton1Click:Connect(function()
+                        data.Executions = data.Executions + 1
+                        print("Executando "..data.Name.." | Total execuções: "..data.Executions)
+                        -- Executa script online:
+                        -- loadstring(game:HttpGet(data.Link))()
+                        TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position=UDim2.new(0.5,0,0.5,-600)}):Play()
+                    end)
 
-                            local descLabel = Instance.new("TextLabel")
-                            descLabel.Size = UDim2.new(0.7,0,0,40)
-                            descLabel.Position = UDim2.new(0,80,0,35)
-                            descLabel.Text = data.Description
-                            descLabel.TextColor3 = Color3.fromRGB(200,200,200)
-                            descLabel.Font = Enum.Font.Gotham
-                            descLabel.TextSize = 14
-                            descLabel.TextWrapped = true
-                            descLabel.BackgroundTransparency = 1
-                            descLabel.TextXAlignment = Enum.TextXAlignment.Left
-                            descLabel.Parent = slot
-
-                            local actionBtn = Instance.new("TextButton")
-                            actionBtn.Size = UDim2.new(0,80,0,30)
-                            actionBtn.Position = UDim2.new(1,-90,0,25)
-                            actionBtn.Text = "Executar"
-                            actionBtn.TextColor3 = Color3.fromRGB(255,255,255)
-                            actionBtn.BackgroundColor3 = Color3.fromRGB(0,120,255)
-                            actionBtn.Font = Enum.Font.GothamBold
-                            actionBtn.TextSize = 16
-                            local btnCorner = Instance.new("UICorner")
-                            btnCorner.CornerRadius = UDim.new(0,6)
-                            btnCorner.Parent = actionBtn
-                            actionBtn.Parent = slot
-
-                            actionBtn.MouseButton1Click:Connect(function()
-                                data.Executions = data.Executions + 1
-                                print("Executando "..data.Name.." | Total execuções: "..data.Executions)
-                                closeMenu()
-                            end)
-
-                            totalHeight = totalHeight + 90
-                        end
-                    end
-
-                    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, math.max(totalHeight, scrollFrame.AbsoluteSize.Y))
+                    totalHeight = totalHeight + 110 -- Espaço entre os blocos
                 end
 
-                searchBox:GetPropertyChangedSignal("Text"):Connect(updateCanvas)
-                updateCanvas()
+                scrollFrame.CanvasSize = UDim2.new(0,0,0,totalHeight)
             end
 
-            -- INFORMAÇÕES
             if name == "INFORMAÇÕES" then
                 local infoLabel = Instance.new("TextLabel")
                 infoLabel.Size = UDim2.new(1,-20,1,0)
@@ -298,7 +262,6 @@ local function createTabButton(name,index,totalTabs)
     end)
 end
 
--- Criar abas SCRIPT e INFORMAÇÕES
 for i,name in ipairs(tabs) do
     createTabButton(name,i,#tabs)
 end
